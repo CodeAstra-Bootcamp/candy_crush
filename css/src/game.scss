@@ -2,10 +2,19 @@
   box-sizing: border-box;
 }
 
-#board {
+#game {
   margin: 0 auto;
   width: 100vmin;
   text-align: center;
+
+  #score-board {
+    height: 10vmin;
+    text-align: right;
+    font-size: 8vmin;
+    line-height: 10vmin;
+    background-color: #cbd0d3;
+    color: #2c3e50;
+  }
 
   .row {
     height: 10vmin;
