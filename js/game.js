@@ -55,11 +55,23 @@ Game = {
       orgColNo = coords[1];
       absDiff = [Math.abs(rowNo - orgRowNo), Math.abs(colNo - orgColNo)].sort();
       if (absDiff[0] === 0 && absDiff[1] === 1) {
-        return console.log("Neighbor clicked");
-      } else {
-        return Game.deselectCell();
+        Game.swapCells(Game.selectedCell, cell);
       }
+      return Game.deselectCell();
     }
+  },
+  swapCells: function(c1, c2) {
+    var child1, child2, className1, className2;
+    child1 = $(c1).children('i');
+    child2 = $(c2).children('i');
+    className1 = child1.attr('class').split(" ").find(function(className) {
+      return className.match(/fa\-/) != null;
+    });
+    className2 = child2.attr('class').split(" ").find(function(className) {
+      return className.match(/fa\-/) != null;
+    });
+    child1.removeClass(className1).addClass(className2);
+    return child2.removeClass(className2).addClass(className1);
   },
   selectCell: function(cell) {
     var colNo, coords, rowNo;

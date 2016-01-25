@@ -41,9 +41,24 @@ Game =
       orgColNo = coords[1]
       absDiff = [Math.abs(rowNo - orgRowNo), Math.abs(colNo - orgColNo)].sort()
       if absDiff[0] == 0 && absDiff[1] == 1
-        console.log "Neighbor clicked"
-      else
-        Game.deselectCell()
+        Game.swapCells(Game.selectedCell, cell)
+      Game.deselectCell()
+  swapCells:(c1, c2) ->
+    child1 = $(c1).children('i')
+    child2 = $(c2).children('i')
+    # Get fa-* className of first child
+    className1 = child1
+    .attr('class')
+    .split(" ")
+    .find((className) -> className.match(/fa\-/)?)
+    # Get fa-* className of second child
+    className2 = child2
+    .attr('class')
+    .split(" ")
+    .find((className) -> className.match(/fa\-/)?)
+    # Interchange classes
+    child1.removeClass(className1).addClass(className2)
+    child2.removeClass(className2).addClass(className1)
   selectCell: (cell) ->
     Game.selectedCell = cell
     $(cell).children('i').addClass('flash')
