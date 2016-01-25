@@ -1,0 +1,20 @@
+* {
+  box-sizing: border-box;
+}
+
+#board {
+  margin: 0 auto;
+  width: 100vmin;
+
+  .row {
+    height: 10vmin;
+
+    .cell {
+      display: inline-block;
+      width: 10vmin;
+      height: 10vmin;
+      background-color: #ecf0f1;
+      border: 1px solid #cbd0d3;
+    }
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "name": "candy_crush",
+  "description": "",
+  "main": "index.js",
+  "authors": [
+    "B V Satyaram <bvsatyaram@gmail.com>"
+  ],
+  "license": "MIT",
+  "homepage": "https://github.com/bvsatyaram/candy_crush",
+  "moduleType": [
+    "es6",
+    "node"
+  ],
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ]
+}
