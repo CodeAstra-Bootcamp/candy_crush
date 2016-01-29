@@ -16,10 +16,9 @@ Game = {
     return [rowNo, colNo];
   },
   checkMatches: function() {
-    var checkingShape, currentCandy, currentCell, currentColNo, currentLength, currentRowNo, currentShape, results;
-    console.log("Checking matches");
+    var checkingShape, currentCandy, currentCell, currentColNo, currentLength, currentRowNo, currentShape, matchFound;
     currentRowNo = Game.rowsCount;
-    results = [];
+    matchFound = false;
     while (currentRowNo > 0) {
       currentColNo = 1;
       checkingShape = null;
@@ -34,10 +33,12 @@ Game = {
         if (checkingShape === currentShape) {
           currentLength++;
           if (currentColNo === Game.columnsCount && currentLength > 2) {
+            matchFound = true;
             Game.handleMatch(currentRowNo, currentColNo + 1, currentLength);
           }
         } else {
           if (currentLength > 2) {
+            matchFound = true;
             Game.handleMatch(currentRowNo, currentColNo, currentLength);
           }
           checkingShape = currentShape;
@@ -45,9 +46,13 @@ Game = {
         }
         currentColNo++;
       }
-      results.push(currentRowNo--);
+      currentRowNo--;
     }
-    return results;
+    return setTimeout(function() {
+      if (matchFound) {
+        return Game.checkMatches();
+      }
+    }, Game.waitTimes.recheck);
   },
   deselectCell: function() {
     $('.cell i').removeClass('jello').removeClass('flash');
@@ -115,7 +120,6 @@ Game = {
       return Game.populateCandyWithRandomShape(ele);
     });
   },
-  shapes: ["heart", "star", "square", "circle", "rocket", "car"],
   randomShapeClass: function() {
     return "fa-" + Game.shapes[Math.floor(Math.random() * Game.shapes.length)];
   },
@@ -132,7 +136,6 @@ Game = {
         var i, k, ref, results;
         candy.removeClass("zoomOutDown");
         candy.removeClass(shapeClass);
-        console.log("Removing shape: " + shapeClass);
         Game.populateCandyWithRandomShape(candy);
         results = [];
         for (i = k = ref = rowNo; ref <= 1 ? k <= 1 : k >= 1; i = ref <= 1 ? ++k : --k) {
@@ -143,8 +146,8 @@ Game = {
           }
         }
         return results;
-      }, 500);
-    }, 1500);
+      }, Game.waitTimes.removeMatch);
+    }, Game.waitTimes.highLightMatch);
   },
   removeElements: function(rowNo, firstColNo, lastColNo) {
     var colNo, k, ref, ref1, results;
@@ -171,6 +174,7 @@ Game = {
       return className.match(/fa\-/) != null;
     });
   },
+  shapes: ["heart", "star", "square", "circle", "rocket", "car"],
   swapCells: function(c1, c2) {
     var child1, child2, className1, className2;
     child1 = Game.candyInCell(c1);
@@ -182,6 +186,12 @@ Game = {
   },
   updateScore: function() {
     return $('#score').html(Game.score);
+  },
+  waitTimes: {
+    buffer: 500,
+    highLightMatch: 1500,
+    removeMatch: 500,
+    recheck: 2500
   },
   init: function() {
     Game.dummyShapeClass = 'fa-circle-thin';

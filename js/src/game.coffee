@@ -9,8 +9,8 @@ Game =
     colNo = parseInt(cell.dataset.colNo)
     [rowNo, colNo]
   checkMatches: ->
-    console.log "Checking matches"
     currentRowNo = Game.rowsCount
+    matchFound = false
 
     while currentRowNo > 0
       currentColNo = 1
@@ -24,14 +24,19 @@ Game =
         if checkingShape == currentShape
           currentLength++
           if currentColNo == Game.columnsCount && currentLength > 2
+            matchFound = true
             Game.handleMatch currentRowNo, (currentColNo + 1), currentLength
         else
           if currentLength > 2
+            matchFound = true
             Game.handleMatch currentRowNo, currentColNo, currentLength
           checkingShape = currentShape
           currentLength = 1
         currentColNo++
       currentRowNo--
+    setTimeout ->
+      Game.checkMatches() if matchFound
+    , Game.waitTimes.recheck
   deselectCell: ->
     $('.cell i').removeClass('jello').removeClass('flash')
     Game.selectedCell = null
@@ -83,7 +88,6 @@ Game =
   populateCellsWithShapes: ->
     $.each $(".cell i"), (i, ele) ->
       Game.populateCandyWithRandomShape(ele)
-  shapes: ["heart", "star", "square", "circle", "rocket", "car"]
   randomShapeClass: ->
     "fa-" + Game.shapes[Math.floor(Math.random()*Game.shapes.length)]
   removeElement: (rowNo, colNo) ->
@@ -97,12 +101,11 @@ Game =
       setTimeout ->
         candy.removeClass "zoomOutDown"
         candy.removeClass(shapeClass)
-        console.log "Removing shape: #{shapeClass}"
         Game.populateCandyWithRandomShape(candy)
         for i in [rowNo..1]
           Game.swapCells(Game.fetchCell(i, colNo), Game.fetchCell(i-1, colNo)) if i > 1
-      , 500
-    , 1500
+      , Game.waitTimes.removeMatch
+    , Game.waitTimes.highLightMatch
   removeElements: (rowNo, firstColNo, lastColNo)->
     # Game.removeElement(rowNo, colNo) for colNo in [firstColNo..lastColNo]
     for colNo in [firstColNo..lastColNo]
@@ -122,6 +125,7 @@ Game =
     .attr('class')
     .split(" ")
     .find((className) -> className.match(/fa\-/)?)
+  shapes: ["heart", "star", "square", "circle", "rocket", "car"]
   swapCells:(c1, c2) ->
     child1 = Game.candyInCell(c1)
     child2 = Game.candyInCell(c2)
@@ -132,6 +136,11 @@ Game =
     child2.removeClass(className2).addClass(className1)
   updateScore: ->
     $('#score').html(Game.score)
+  waitTimes:
+    buffer: 500
+    highLightMatch: 1500
+    removeMatch: 500
+    recheck: 2500
   init: ->
     Game.dummyShapeClass = 'fa-circle-thin'
     Game.rowsCount = 0
