@@ -2,8 +2,11 @@ Game =
   shapes: ["heart", "star", "square", "circle", "rocket", "car"]
   randomShapeClass: ->
     "fa-" + Game.shapes[Math.floor(Math.random()*Game.shapes.length)]
+  populateCandyWithRandomShape: (candy) ->
+    $(candy).addClass(Game.randomShapeClass).addClass('animated').addClass('infinite')
   populateCellsWithShapes: ->
-    $.each $(".cell i"), (i, ele) -> $(ele).addClass(Game.randomShapeClass).addClass('animated').addClass('infinite')
+    $.each $(".cell i"), (i, ele) ->
+      Game.populateCandyWithRandomShape(ele)
   popualateCellCoordinates: ->
     rowNo = 1
     colNo = 1
@@ -79,7 +82,13 @@ Game =
     cell = Game.fetchCell(rowNo, colNo)
     candy = Game.candyInCell(cell)
     shapeClass = Game.shapeClassOfCandy(candy)
-    candy.removeClass(shapeClass).addClass('fa-circle-thin')
+    candy.removeClass(shapeClass).addClass(Game.dummyShapeClass)
+    for i in [rowNo..2]
+      Game.swapCells Game.fetchCell(i, colNo), Game.fetchCell(i-1, colNo)
+    topCell = Game.fetchCell 1, colNo
+    topCandy = Game.candyInCell(topCell)
+    topCandy.removeClass Game.dummyShapeClass
+    Game.populateCandyWithRandomShape(topCandy)
   removeElements: (rowNo, firstColNo, lastColNo)->
     # Game.removeElement(rowNo, colNo) for colNo in [firstColNo..lastColNo]
     for colNo in [firstColNo..lastColNo]
@@ -110,6 +119,7 @@ Game =
         currentLength = 1
       currentColNo++
   init: ->
+    Game.dummyShapeClass = 'fa-circle-thin'
     Game.rowsCount = 0
     Game.columnsCount = 0
     Game.deselectCell()

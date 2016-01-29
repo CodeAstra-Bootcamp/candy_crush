@@ -5,9 +5,12 @@ Game = {
   randomShapeClass: function() {
     return "fa-" + Game.shapes[Math.floor(Math.random() * Game.shapes.length)];
   },
+  populateCandyWithRandomShape: function(candy) {
+    return $(candy).addClass(Game.randomShapeClass).addClass('animated').addClass('infinite');
+  },
   populateCellsWithShapes: function() {
     return $.each($(".cell i"), function(i, ele) {
-      return $(ele).addClass(Game.randomShapeClass).addClass('animated').addClass('infinite');
+      return Game.populateCandyWithRandomShape(ele);
     });
   },
   popualateCellCoordinates: function() {
@@ -100,11 +103,18 @@ Game = {
     });
   },
   removeElement: function(rowNo, colNo) {
-    var candy, cell, shapeClass;
+    var candy, cell, i, k, ref, shapeClass, topCandy, topCell;
     cell = Game.fetchCell(rowNo, colNo);
     candy = Game.candyInCell(cell);
     shapeClass = Game.shapeClassOfCandy(candy);
-    return candy.removeClass(shapeClass).addClass('fa-circle-thin');
+    candy.removeClass(shapeClass).addClass(Game.dummyShapeClass);
+    for (i = k = ref = rowNo; ref <= 2 ? k <= 2 : k >= 2; i = ref <= 2 ? ++k : --k) {
+      Game.swapCells(Game.fetchCell(i, colNo), Game.fetchCell(i - 1, colNo));
+    }
+    topCell = Game.fetchCell(1, colNo);
+    topCandy = Game.candyInCell(topCell);
+    topCandy.removeClass(Game.dummyShapeClass);
+    return Game.populateCandyWithRandomShape(topCandy);
   },
   removeElements: function(rowNo, firstColNo, lastColNo) {
     var colNo, k, ref, ref1, results;
@@ -144,6 +154,7 @@ Game = {
     return results;
   },
   init: function() {
+    Game.dummyShapeClass = 'fa-circle-thin';
     Game.rowsCount = 0;
     Game.columnsCount = 0;
     Game.deselectCell();
