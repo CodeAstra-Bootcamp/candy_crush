@@ -33,11 +33,12 @@ Game = {
         }
         if (checkingShape === currentShape) {
           currentLength++;
+          if (currentColNo === Game.columnsCount && currentLength > 2) {
+            Game.handleMatch(currentRowNo, currentColNo + 1, currentLength);
+          }
         } else {
           if (currentLength > 2) {
-            console.log("The length is more: " + currentLength);
-            Game.incrementScore(currentLength + 1);
-            Game.removeElements(currentRowNo, currentColNo - currentLength, currentColNo - 1);
+            Game.handleMatch(currentRowNo, currentColNo, currentLength);
           }
           checkingShape = currentShape;
           currentLength = 1;
@@ -78,6 +79,10 @@ Game = {
       }
       return Game.deselectCell();
     }
+  },
+  handleMatch: function(rowNo, colNo, length) {
+    Game.incrementScore(length + 1);
+    return Game.removeElements(rowNo, colNo - length, colNo - 1);
   },
   highlightCell: function(cell) {
     return $(cell).children('i').addClass('jello');

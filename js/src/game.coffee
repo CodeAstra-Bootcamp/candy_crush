@@ -23,15 +23,11 @@ Game =
         checkingShape = currentShape unless checkingShape?
         if checkingShape == currentShape
           currentLength++
+          if currentColNo == Game.columnsCount && currentLength > 2
+            Game.handleMatch currentRowNo, (currentColNo + 1), currentLength
         else
           if currentLength > 2
-            console.log "The length is more: #{currentLength}"
-            Game.incrementScore(currentLength + 1)
-            Game.removeElements currentRowNo, (currentColNo - currentLength), (currentColNo - 1)
-            # Remove the matching elements
-            # Bring down the elements above the removed elements
-            # Populate blank cell on top with random shapes
-            # Break the checking process
+            Game.handleMatch currentRowNo, currentColNo, currentLength
           checkingShape = currentShape
           currentLength = 1
         currentColNo++
@@ -60,6 +56,9 @@ Game =
         Game.incrementScore(-1)
         Game.checkMatches()
       Game.deselectCell()
+  handleMatch: (rowNo, colNo, length) ->
+    Game.incrementScore(length + 1)
+    Game.removeElements rowNo, (colNo - length), (colNo - 1)
   highlightCell: (cell) ->
     $(cell).children('i').addClass('jello')
   incrementScore: (increment) ->
