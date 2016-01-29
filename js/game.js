@@ -99,6 +99,21 @@ Game = {
       return Game.handleCellClick(this);
     });
   },
+  removeElement: function(rowNo, colNo) {
+    var candy, cell, shapeClass;
+    cell = Game.fetchCell(rowNo, colNo);
+    candy = Game.candyInCell(cell);
+    shapeClass = Game.shapeClassOfCandy(candy);
+    return candy.removeClass(shapeClass).addClass('fa-circle-thin');
+  },
+  removeElements: function(rowNo, firstColNo, lastColNo) {
+    var colNo, k, ref, ref1, results;
+    results = [];
+    for (colNo = k = ref = firstColNo, ref1 = lastColNo; ref <= ref1 ? k <= ref1 : k >= ref1; colNo = ref <= ref1 ? ++k : --k) {
+      results.push(Game.removeElement(rowNo, colNo));
+    }
+    return results;
+  },
   checkMatches: function() {
     var checkingShape, currentCandy, currentCell, currentColNo, currentLength, currentRowNo, currentShape, results;
     console.log("Checking matches");
@@ -119,6 +134,7 @@ Game = {
       } else {
         if (currentLength > 2) {
           console.log("The length is more: " + currentLength);
+          Game.removeElements(currentRowNo, currentColNo - currentLength, currentColNo - 1);
         }
         checkingShape = currentShape;
         currentLength = 1;

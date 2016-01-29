@@ -35,3 +35,5 @@
           color: #d35400; }
         #game .row .cell i.fa-car {
           color: #f1c40f; }
+        #game .row .cell i.fa-circle-thin {
+          color: transparent; }

@@ -75,6 +75,15 @@ Game =
   bindCellsForClick: ->
     $('.cell').click ->
       Game.handleCellClick(@)
+  removeElement: (rowNo, colNo) ->
+    cell = Game.fetchCell(rowNo, colNo)
+    candy = Game.candyInCell(cell)
+    shapeClass = Game.shapeClassOfCandy(candy)
+    candy.removeClass(shapeClass).addClass('fa-circle-thin')
+  removeElements: (rowNo, firstColNo, lastColNo)->
+    # Game.removeElement(rowNo, colNo) for colNo in [firstColNo..lastColNo]
+    for colNo in [firstColNo..lastColNo]
+      Game.removeElement(rowNo, colNo)
   checkMatches: ->
     console.log "Checking matches"
     currentRowNo = Game.rowsCount
@@ -92,6 +101,7 @@ Game =
       else
         if currentLength > 2
           console.log "The length is more: #{currentLength}"
+          Game.removeElements currentRowNo, (currentColNo - currentLength), (currentColNo - 1)
           # Remove the matching elements
           # Bring down the elements above the removed elements
           # Populate blank cell on top with random shapes
