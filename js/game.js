@@ -112,18 +112,27 @@ Game = {
     return "fa-" + Game.shapes[Math.floor(Math.random() * Game.shapes.length)];
   },
   removeElement: function(rowNo, colNo) {
-    var candy, cell, i, k, ref, shapeClass, topCandy, topCell;
+    var candy, cell, shapeClass;
     cell = Game.fetchCell(rowNo, colNo);
     candy = Game.candyInCell(cell);
     shapeClass = Game.shapeClassOfCandy(candy);
-    candy.removeClass(shapeClass).addClass(Game.dummyShapeClass);
-    for (i = k = ref = rowNo; ref <= 2 ? k <= 2 : k >= 2; i = ref <= 2 ? ++k : --k) {
-      Game.swapCells(Game.fetchCell(i, colNo), Game.fetchCell(i - 1, colNo));
-    }
-    topCell = Game.fetchCell(1, colNo);
-    topCandy = Game.candyInCell(topCell);
-    topCandy.removeClass(Game.dummyShapeClass);
-    return Game.populateCandyWithRandomShape(topCandy);
+    candy.addClass("shake");
+    return setTimeout(function() {
+      candy.removeClass("shake");
+      candy.addClass("zoomOutDown");
+      return setTimeout(function() {
+        var i, k, ref, topCandy, topCell;
+        candy.removeClass("zoomOutDown");
+        candy.removeClass(shapeClass).addClass(Game.dummyShapeClass);
+        for (i = k = ref = rowNo; ref <= 2 ? k <= 2 : k >= 2; i = ref <= 2 ? ++k : --k) {
+          Game.swapCells(Game.fetchCell(i, colNo), Game.fetchCell(i - 1, colNo));
+        }
+        topCell = Game.fetchCell(1, colNo);
+        topCandy = Game.candyInCell(topCell);
+        topCandy.removeClass(Game.dummyShapeClass);
+        return Game.populateCandyWithRandomShape(topCandy);
+      }, 500);
+    }, 1500);
   },
   removeElements: function(rowNo, firstColNo, lastColNo) {
     var colNo, k, ref, ref1, results;

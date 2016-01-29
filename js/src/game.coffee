@@ -89,13 +89,21 @@ Game =
     cell = Game.fetchCell(rowNo, colNo)
     candy = Game.candyInCell(cell)
     shapeClass = Game.shapeClassOfCandy(candy)
-    candy.removeClass(shapeClass).addClass(Game.dummyShapeClass)
-    for i in [rowNo..2]
-      Game.swapCells Game.fetchCell(i, colNo), Game.fetchCell(i-1, colNo)
-    topCell = Game.fetchCell 1, colNo
-    topCandy = Game.candyInCell(topCell)
-    topCandy.removeClass Game.dummyShapeClass
-    Game.populateCandyWithRandomShape(topCandy)
+    candy.addClass "shake"
+    setTimeout ->
+      candy.removeClass "shake"
+      candy.addClass "zoomOutDown"
+      setTimeout ->
+        candy.removeClass "zoomOutDown"
+        candy.removeClass(shapeClass).addClass(Game.dummyShapeClass)
+        for i in [rowNo..2]
+          Game.swapCells Game.fetchCell(i, colNo), Game.fetchCell(i-1, colNo)
+        topCell = Game.fetchCell 1, colNo
+        topCandy = Game.candyInCell(topCell)
+        topCandy.removeClass Game.dummyShapeClass
+        Game.populateCandyWithRandomShape(topCandy)
+      , 500
+    , 1500
   removeElements: (rowNo, firstColNo, lastColNo)->
     # Game.removeElement(rowNo, colNo) for colNo in [firstColNo..lastColNo]
     for colNo in [firstColNo..lastColNo]
