@@ -9,6 +9,7 @@ Game =
     colNo = parseInt(cell.dataset.colNo)
     [rowNo, colNo]
   checkMatches: ->
+    Game.matchingInProgress = true
     currentRowNo = Game.rowsCount
     matchFound = false
 
@@ -35,7 +36,10 @@ Game =
         currentColNo++
       currentRowNo--
     setTimeout ->
-      Game.checkMatches() if matchFound
+      if matchFound
+        Game.checkMatches()
+      else
+        Game.matchingInProgress = false
     , Game.waitTimes.recheck
   deselectCell: ->
     $('.cell i').removeClass('jello').removeClass('flash')
@@ -46,6 +50,7 @@ Game =
     selector += "[data-col-no='#{colNo}']"
     $(selector)
   handleCellClick: (cell) ->
+    return if Game.matchingInProgress
     if Game.selectedCell == null
       Game.selectCell(cell)
     else
@@ -146,6 +151,7 @@ Game =
     Game.rowsCount = 0
     Game.columnsCount = 0
     Game.score = 0
+    Game.matchingInProgress = false
     Game.updateScore()
     Game.deselectCell()
     Game.populateCellsWithShapes()

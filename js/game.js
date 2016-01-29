@@ -17,6 +17,7 @@ Game = {
   },
   checkMatches: function() {
     var checkingShape, currentCandy, currentCell, currentColNo, currentLength, currentRowNo, currentShape, matchFound;
+    Game.matchingInProgress = true;
     currentRowNo = Game.rowsCount;
     matchFound = false;
     while (currentRowNo > 0) {
@@ -51,6 +52,8 @@ Game = {
     return setTimeout(function() {
       if (matchFound) {
         return Game.checkMatches();
+      } else {
+        return Game.matchingInProgress = false;
       }
     }, Game.waitTimes.recheck);
   },
@@ -67,6 +70,9 @@ Game = {
   },
   handleCellClick: function(cell) {
     var absDiff, colNo, coords, orgColNo, orgRowNo, rowNo;
+    if (Game.matchingInProgress) {
+      return;
+    }
     if (Game.selectedCell === null) {
       return Game.selectCell(cell);
     } else {
@@ -198,6 +204,7 @@ Game = {
     Game.rowsCount = 0;
     Game.columnsCount = 0;
     Game.score = 0;
+    Game.matchingInProgress = false;
     Game.updateScore();
     Game.deselectCell();
     Game.populateCellsWithShapes();
