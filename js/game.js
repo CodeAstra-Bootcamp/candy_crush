@@ -19,29 +19,32 @@ Game = {
     var checkingShape, currentCandy, currentCell, currentColNo, currentLength, currentRowNo, currentShape, results;
     console.log("Checking matches");
     currentRowNo = Game.rowsCount;
-    currentColNo = 1;
-    checkingShape = null;
-    currentLength = 0;
     results = [];
-    while (currentColNo <= Game.columnsCount) {
-      currentCell = Game.fetchCell(currentRowNo, currentColNo);
-      currentCandy = Game.candyInCell(currentCell);
-      currentShape = Game.shapeClassOfCandy(currentCandy);
-      if (checkingShape == null) {
-        checkingShape = currentShape;
-      }
-      if (checkingShape === currentShape) {
-        currentLength++;
-      } else {
-        if (currentLength > 2) {
-          console.log("The length is more: " + currentLength);
-          Game.incrementScore(currentLength + 1);
-          Game.removeElements(currentRowNo, currentColNo - currentLength, currentColNo - 1);
+    while (currentRowNo > 0) {
+      currentColNo = 1;
+      checkingShape = null;
+      currentLength = 0;
+      while (currentColNo <= Game.columnsCount) {
+        currentCell = Game.fetchCell(currentRowNo, currentColNo);
+        currentCandy = Game.candyInCell(currentCell);
+        currentShape = Game.shapeClassOfCandy(currentCandy);
+        if (checkingShape == null) {
+          checkingShape = currentShape;
         }
-        checkingShape = currentShape;
-        currentLength = 1;
+        if (checkingShape === currentShape) {
+          currentLength++;
+        } else {
+          if (currentLength > 2) {
+            console.log("The length is more: " + currentLength);
+            Game.incrementScore(currentLength + 1);
+            Game.removeElements(currentRowNo, currentColNo - currentLength, currentColNo - 1);
+          }
+          checkingShape = currentShape;
+          currentLength = 1;
+        }
+        currentColNo++;
       }
-      results.push(currentColNo++);
+      results.push(currentRowNo--);
     }
     return results;
   },
@@ -121,16 +124,20 @@ Game = {
       candy.removeClass("shake");
       candy.addClass("zoomOutDown");
       return setTimeout(function() {
-        var i, k, ref, topCandy, topCell;
+        var i, k, ref, results;
         candy.removeClass("zoomOutDown");
-        candy.removeClass(shapeClass).addClass(Game.dummyShapeClass);
-        for (i = k = ref = rowNo; ref <= 2 ? k <= 2 : k >= 2; i = ref <= 2 ? ++k : --k) {
-          Game.swapCells(Game.fetchCell(i, colNo), Game.fetchCell(i - 1, colNo));
+        candy.removeClass(shapeClass);
+        console.log("Removing shape: " + shapeClass);
+        Game.populateCandyWithRandomShape(candy);
+        results = [];
+        for (i = k = ref = rowNo; ref <= 1 ? k <= 1 : k >= 1; i = ref <= 1 ? ++k : --k) {
+          if (i > 1) {
+            results.push(Game.swapCells(Game.fetchCell(i, colNo), Game.fetchCell(i - 1, colNo)));
+          } else {
+            results.push(void 0);
+          }
         }
-        topCell = Game.fetchCell(1, colNo);
-        topCandy = Game.candyInCell(topCell);
-        topCandy.removeClass(Game.dummyShapeClass);
-        return Game.populateCandyWithRandomShape(topCandy);
+        return results;
       }, 500);
     }, 1500);
   },

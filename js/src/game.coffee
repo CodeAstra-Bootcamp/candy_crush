@@ -11,29 +11,31 @@ Game =
   checkMatches: ->
     console.log "Checking matches"
     currentRowNo = Game.rowsCount
-    currentColNo = 1
-    checkingShape = null
-    currentLength = 0
 
-    while currentColNo <= Game.columnsCount
-      currentCell = Game.fetchCell(currentRowNo, currentColNo)
-      currentCandy = Game.candyInCell(currentCell)
-      currentShape = Game.shapeClassOfCandy(currentCandy)
-      checkingShape = currentShape unless checkingShape?
-      if checkingShape == currentShape
-        currentLength++
-      else
-        if currentLength > 2
-          console.log "The length is more: #{currentLength}"
-          Game.incrementScore(currentLength + 1)
-          Game.removeElements currentRowNo, (currentColNo - currentLength), (currentColNo - 1)
-          # Remove the matching elements
-          # Bring down the elements above the removed elements
-          # Populate blank cell on top with random shapes
-          # Break the checking process
-        checkingShape = currentShape
-        currentLength = 1
-      currentColNo++
+    while currentRowNo > 0
+      currentColNo = 1
+      checkingShape = null
+      currentLength = 0
+      while currentColNo <= Game.columnsCount
+        currentCell = Game.fetchCell(currentRowNo, currentColNo)
+        currentCandy = Game.candyInCell(currentCell)
+        currentShape = Game.shapeClassOfCandy(currentCandy)
+        checkingShape = currentShape unless checkingShape?
+        if checkingShape == currentShape
+          currentLength++
+        else
+          if currentLength > 2
+            console.log "The length is more: #{currentLength}"
+            Game.incrementScore(currentLength + 1)
+            Game.removeElements currentRowNo, (currentColNo - currentLength), (currentColNo - 1)
+            # Remove the matching elements
+            # Bring down the elements above the removed elements
+            # Populate blank cell on top with random shapes
+            # Break the checking process
+          checkingShape = currentShape
+          currentLength = 1
+        currentColNo++
+      currentRowNo--
   deselectCell: ->
     $('.cell i').removeClass('jello').removeClass('flash')
     Game.selectedCell = null
@@ -95,13 +97,11 @@ Game =
       candy.addClass "zoomOutDown"
       setTimeout ->
         candy.removeClass "zoomOutDown"
-        candy.removeClass(shapeClass).addClass(Game.dummyShapeClass)
-        for i in [rowNo..2]
-          Game.swapCells Game.fetchCell(i, colNo), Game.fetchCell(i-1, colNo)
-        topCell = Game.fetchCell 1, colNo
-        topCandy = Game.candyInCell(topCell)
-        topCandy.removeClass Game.dummyShapeClass
-        Game.populateCandyWithRandomShape(topCandy)
+        candy.removeClass(shapeClass)
+        console.log "Removing shape: #{shapeClass}"
+        Game.populateCandyWithRandomShape(candy)
+        for i in [rowNo..1]
+          Game.swapCells(Game.fetchCell(i, colNo), Game.fetchCell(i-1, colNo)) if i > 1
       , 500
     , 1500
   removeElements: (rowNo, firstColNo, lastColNo)->
