@@ -1,136 +1,19 @@
 var Game;
 
 Game = {
-  shapes: ["heart", "star", "square", "circle", "rocket", "car"],
-  randomShapeClass: function() {
-    return "fa-" + Game.shapes[Math.floor(Math.random() * Game.shapes.length)];
-  },
-  populateCandyWithRandomShape: function(candy) {
-    return $(candy).addClass(Game.randomShapeClass).addClass('animated').addClass('infinite');
-  },
-  populateCellsWithShapes: function() {
-    return $.each($(".cell i"), function(i, ele) {
-      return Game.populateCandyWithRandomShape(ele);
+  bindCellsForClick: function() {
+    return $('.cell').click(function() {
+      return Game.handleCellClick(this);
     });
   },
-  popualateCellCoordinates: function() {
-    var colNo, rowNo;
-    rowNo = 1;
-    colNo = 1;
-    $.each($("#board .row"), function(i, row) {
-      colNo = 1;
-      $.each($(row).children('.cell'), function(j, cell) {
-        cell.dataset.rowNo = rowNo;
-        cell.dataset.colNo = colNo;
-        return colNo++;
-      });
-      return rowNo++;
-    });
-    Game.rowsCount = rowNo - 1;
-    return Game.columnsCount = colNo - 1;
-  },
-  fetchCell: function(rowNo, colNo) {
-    var selector;
-    selector = ".cell";
-    selector += "[data-row-no='" + rowNo + "']";
-    selector += "[data-col-no='" + colNo + "']";
-    return $(selector);
+  candyInCell: function(cell) {
+    return $(cell).children('i');
   },
   coordinatesOfCell: function(cell) {
     var colNo, rowNo;
     rowNo = parseInt(cell.dataset.rowNo);
     colNo = parseInt(cell.dataset.colNo);
     return [rowNo, colNo];
-  },
-  highlightCell: function(cell) {
-    return $(cell).children('i').addClass('jello');
-  },
-  updateScore: function() {
-    return $('#score').html(Game.score);
-  },
-  incrementScore: function(increment) {
-    Game.score += increment;
-    return Game.updateScore();
-  },
-  handleCellClick: function(cell) {
-    var absDiff, colNo, coords, orgColNo, orgRowNo, rowNo;
-    if (Game.selectedCell === null) {
-      return Game.selectCell(cell);
-    } else {
-      coords = Game.coordinatesOfCell(cell);
-      rowNo = coords[0];
-      colNo = coords[1];
-      coords = Game.coordinatesOfCell(Game.selectedCell);
-      orgRowNo = coords[0];
-      orgColNo = coords[1];
-      absDiff = [Math.abs(rowNo - orgRowNo), Math.abs(colNo - orgColNo)].sort();
-      if (absDiff[0] === 0 && absDiff[1] === 1) {
-        Game.swapCells(Game.selectedCell, cell);
-        Game.incrementScore(-1);
-        Game.checkMatches();
-      }
-      return Game.deselectCell();
-    }
-  },
-  candyInCell: function(cell) {
-    return $(cell).children('i');
-  },
-  shapeClassOfCandy: function(candy) {
-    return candy.attr('class').split(" ").find(function(className) {
-      return className.match(/fa\-/) != null;
-    });
-  },
-  swapCells: function(c1, c2) {
-    var child1, child2, className1, className2;
-    child1 = Game.candyInCell(c1);
-    child2 = Game.candyInCell(c2);
-    className1 = Game.shapeClassOfCandy(child1);
-    className2 = Game.shapeClassOfCandy(child2);
-    child1.removeClass(className1).addClass(className2);
-    return child2.removeClass(className2).addClass(className1);
-  },
-  selectCell: function(cell) {
-    var colNo, coords, rowNo;
-    Game.selectedCell = cell;
-    $(cell).children('i').addClass('flash');
-    coords = Game.coordinatesOfCell(cell);
-    rowNo = coords[0];
-    colNo = coords[1];
-    Game.highlightCell(Game.fetchCell(rowNo - 1, colNo));
-    Game.highlightCell(Game.fetchCell(rowNo + 1, colNo));
-    Game.highlightCell(Game.fetchCell(rowNo, colNo - 1));
-    return Game.highlightCell(Game.fetchCell(rowNo, colNo + 1));
-  },
-  deselectCell: function() {
-    $('.cell i').removeClass('jello').removeClass('flash');
-    return Game.selectedCell = null;
-  },
-  bindCellsForClick: function() {
-    return $('.cell').click(function() {
-      return Game.handleCellClick(this);
-    });
-  },
-  removeElement: function(rowNo, colNo) {
-    var candy, cell, i, k, ref, shapeClass, topCandy, topCell;
-    cell = Game.fetchCell(rowNo, colNo);
-    candy = Game.candyInCell(cell);
-    shapeClass = Game.shapeClassOfCandy(candy);
-    candy.removeClass(shapeClass).addClass(Game.dummyShapeClass);
-    for (i = k = ref = rowNo; ref <= 2 ? k <= 2 : k >= 2; i = ref <= 2 ? ++k : --k) {
-      Game.swapCells(Game.fetchCell(i, colNo), Game.fetchCell(i - 1, colNo));
-    }
-    topCell = Game.fetchCell(1, colNo);
-    topCandy = Game.candyInCell(topCell);
-    topCandy.removeClass(Game.dummyShapeClass);
-    return Game.populateCandyWithRandomShape(topCandy);
-  },
-  removeElements: function(rowNo, firstColNo, lastColNo) {
-    var colNo, k, ref, ref1, results;
-    results = [];
-    for (colNo = k = ref = firstColNo, ref1 = lastColNo; ref <= ref1 ? k <= ref1 : k >= ref1; colNo = ref <= ref1 ? ++k : --k) {
-      results.push(Game.removeElement(rowNo, colNo));
-    }
-    return results;
   },
   checkMatches: function() {
     var checkingShape, currentCandy, currentCell, currentColNo, currentLength, currentRowNo, currentShape, results;
@@ -161,6 +44,123 @@ Game = {
       results.push(currentColNo++);
     }
     return results;
+  },
+  deselectCell: function() {
+    $('.cell i').removeClass('jello').removeClass('flash');
+    return Game.selectedCell = null;
+  },
+  fetchCell: function(rowNo, colNo) {
+    var selector;
+    selector = ".cell";
+    selector += "[data-row-no='" + rowNo + "']";
+    selector += "[data-col-no='" + colNo + "']";
+    return $(selector);
+  },
+  handleCellClick: function(cell) {
+    var absDiff, colNo, coords, orgColNo, orgRowNo, rowNo;
+    if (Game.selectedCell === null) {
+      return Game.selectCell(cell);
+    } else {
+      coords = Game.coordinatesOfCell(cell);
+      rowNo = coords[0];
+      colNo = coords[1];
+      coords = Game.coordinatesOfCell(Game.selectedCell);
+      orgRowNo = coords[0];
+      orgColNo = coords[1];
+      absDiff = [Math.abs(rowNo - orgRowNo), Math.abs(colNo - orgColNo)].sort();
+      if (absDiff[0] === 0 && absDiff[1] === 1) {
+        Game.swapCells(Game.selectedCell, cell);
+        Game.incrementScore(-1);
+        Game.checkMatches();
+      }
+      return Game.deselectCell();
+    }
+  },
+  highlightCell: function(cell) {
+    return $(cell).children('i').addClass('jello');
+  },
+  incrementScore: function(increment) {
+    Game.score += increment;
+    return Game.updateScore();
+  },
+  populateCandyWithRandomShape: function(candy) {
+    return $(candy).addClass(Game.randomShapeClass).addClass('animated').addClass('infinite');
+  },
+  popualateCellCoordinates: function() {
+    var colNo, rowNo;
+    rowNo = 1;
+    colNo = 1;
+    $.each($("#board .row"), function(i, row) {
+      colNo = 1;
+      $.each($(row).children('.cell'), function(j, cell) {
+        cell.dataset.rowNo = rowNo;
+        cell.dataset.colNo = colNo;
+        return colNo++;
+      });
+      return rowNo++;
+    });
+    Game.rowsCount = rowNo - 1;
+    return Game.columnsCount = colNo - 1;
+  },
+  populateCellsWithShapes: function() {
+    return $.each($(".cell i"), function(i, ele) {
+      return Game.populateCandyWithRandomShape(ele);
+    });
+  },
+  shapes: ["heart", "star", "square", "circle", "rocket", "car"],
+  randomShapeClass: function() {
+    return "fa-" + Game.shapes[Math.floor(Math.random() * Game.shapes.length)];
+  },
+  removeElement: function(rowNo, colNo) {
+    var candy, cell, i, k, ref, shapeClass, topCandy, topCell;
+    cell = Game.fetchCell(rowNo, colNo);
+    candy = Game.candyInCell(cell);
+    shapeClass = Game.shapeClassOfCandy(candy);
+    candy.removeClass(shapeClass).addClass(Game.dummyShapeClass);
+    for (i = k = ref = rowNo; ref <= 2 ? k <= 2 : k >= 2; i = ref <= 2 ? ++k : --k) {
+      Game.swapCells(Game.fetchCell(i, colNo), Game.fetchCell(i - 1, colNo));
+    }
+    topCell = Game.fetchCell(1, colNo);
+    topCandy = Game.candyInCell(topCell);
+    topCandy.removeClass(Game.dummyShapeClass);
+    return Game.populateCandyWithRandomShape(topCandy);
+  },
+  removeElements: function(rowNo, firstColNo, lastColNo) {
+    var colNo, k, ref, ref1, results;
+    results = [];
+    for (colNo = k = ref = firstColNo, ref1 = lastColNo; ref <= ref1 ? k <= ref1 : k >= ref1; colNo = ref <= ref1 ? ++k : --k) {
+      results.push(Game.removeElement(rowNo, colNo));
+    }
+    return results;
+  },
+  selectCell: function(cell) {
+    var colNo, coords, rowNo;
+    Game.selectedCell = cell;
+    $(cell).children('i').addClass('flash');
+    coords = Game.coordinatesOfCell(cell);
+    rowNo = coords[0];
+    colNo = coords[1];
+    Game.highlightCell(Game.fetchCell(rowNo - 1, colNo));
+    Game.highlightCell(Game.fetchCell(rowNo + 1, colNo));
+    Game.highlightCell(Game.fetchCell(rowNo, colNo - 1));
+    return Game.highlightCell(Game.fetchCell(rowNo, colNo + 1));
+  },
+  shapeClassOfCandy: function(candy) {
+    return candy.attr('class').split(" ").find(function(className) {
+      return className.match(/fa\-/) != null;
+    });
+  },
+  swapCells: function(c1, c2) {
+    var child1, child2, className1, className2;
+    child1 = Game.candyInCell(c1);
+    child2 = Game.candyInCell(c2);
+    className1 = Game.shapeClassOfCandy(child1);
+    className2 = Game.shapeClassOfCandy(child2);
+    child1.removeClass(className1).addClass(className2);
+    return child2.removeClass(className2).addClass(className1);
+  },
+  updateScore: function() {
+    return $('#score').html(Game.score);
   },
   init: function() {
     Game.dummyShapeClass = 'fa-circle-thin';
