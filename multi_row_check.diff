@@ -1,0 +1,201 @@
+diff --git a/js/game.js b/js/game.js
+index a4fb7a9..3082fe2 100644
+--- a/js/game.js
++++ b/js/game.js
+@@ -59,6 +59,7 @@ Game = {
+       absDiff = [Math.abs(rowNo - orgRowNo), Math.abs(colNo - orgColNo)].sort();
+       if (absDiff[0] === 0 && absDiff[1] === 1) {
+         Game.swapCells(Game.selectedCell, cell);
++        Game.checkMatches();
+       }
+       return Game.deselectCell();
+     }
+@@ -78,8 +79,7 @@ Game = {
+     className1 = Game.shapeClassOfCandy(child1);
+     className2 = Game.shapeClassOfCandy(child2);
+     child1.removeClass(className1).addClass(className2);
+-    child2.removeClass(className2).addClass(className1);
+-    return Game.checkMatches();
++    return child2.removeClass(className2).addClass(className1);
+   },
+   selectCell: function(cell) {
+     var colNo, coords, rowNo;
+@@ -103,18 +103,17 @@ Game = {
+     });
+   },
+   removeElement: function(rowNo, colNo) {
+-    var candy, cell, i, k, ref, shapeClass, topCandy, topCell;
++    var candy, cell, i, k, ref, results, shapeClass;
+     cell = Game.fetchCell(rowNo, colNo);
+     candy = Game.candyInCell(cell);
+     shapeClass = Game.shapeClassOfCandy(candy);
+-    candy.removeClass(shapeClass).addClass(Game.dummyShapeClass);
++    candy.removeClass(shapeClass);
++    Game.populateCandyWithRandomShape(candy);
++    results = [];
+     for (i = k = ref = rowNo; ref <= 2 ? k <= 2 : k >= 2; i = ref <= 2 ? ++k : --k) {
+-      Game.swapCells(Game.fetchCell(i, colNo), Game.fetchCell(i - 1, colNo));
++      results.push(Game.swapCells(Game.fetchCell(i, colNo), Game.fetchCell(i - 1, colNo)));
+     }
+-    topCell = Game.fetchCell(1, colNo);
+-    topCandy = Game.candyInCell(topCell);
+-    topCandy.removeClass(Game.dummyShapeClass);
+-    return Game.populateCandyWithRandomShape(topCandy);
++    return results;
+   },
+   removeElements: function(rowNo, firstColNo, lastColNo) {
+     var colNo, k, ref, ref1, results;
+@@ -125,31 +124,36 @@ Game = {
+     return results;
+   },
+   checkMatches: function() {
+-    var checkingShape, currentCandy, currentCell, currentColNo, currentLength, currentRowNo, currentShape, results;
++    var checkingShape, currentCandy, currentCell, currentColNo, currentLength, currentRowNo, currentShape, matcherRunning, results;
+     console.log("Checking matches");
+     currentRowNo = Game.rowsCount;
+-    currentColNo = 1;
+-    checkingShape = null;
+-    currentLength = 0;
++    matcherRunning = true;
+     results = [];
+-    while (currentColNo <= Game.columnsCount) {
+-      currentCell = Game.fetchCell(currentRowNo, currentColNo);
+-      currentCandy = Game.candyInCell(currentCell);
+-      currentShape = Game.shapeClassOfCandy(currentCandy);
+-      if (checkingShape == null) {
+-        checkingShape = currentShape;
+-      }
+-      if (checkingShape === currentShape) {
+-        currentLength++;
+-      } else {
+-        if (currentLength > 2) {
+-          console.log("The length is more: " + currentLength);
+-          Game.removeElements(currentRowNo, currentColNo - currentLength, currentColNo - 1);
++    while ((currentRowNo > 1) && matcherRunning) {
++      checkingShape = null;
++      currentColNo = 1;
++      currentLength = 0;
++      while ((currentColNo <= Game.columnsCount) && matcherRunning) {
++        currentCell = Game.fetchCell(currentRowNo, currentColNo);
++        currentCandy = Game.candyInCell(currentCell);
++        currentShape = Game.shapeClassOfCandy(currentCandy);
++        if (checkingShape == null) {
++          checkingShape = currentShape;
++        }
++        if (checkingShape === currentShape) {
++          currentLength++;
++        } else {
++          if (currentLength > 2) {
++            matcherRunning = false;
++            console.log("The length is more: " + currentLength);
++            Game.removeElements(currentRowNo, currentColNo - currentLength, currentColNo - 1);
++          }
++          checkingShape = currentShape;
++          currentLength = 1;
+         }
+-        checkingShape = currentShape;
+-        currentLength = 1;
++        currentColNo++;
+       }
+-      results.push(currentColNo++);
++      results.push(currentRowNo--);
+     }
+     return results;
+   },
+diff --git a/js/src/game.coffee b/js/src/game.coffee
+index 9755cfe..7315e45 100644
+--- a/js/src/game.coffee
++++ b/js/src/game.coffee
+@@ -45,6 +45,7 @@ Game =
+       absDiff = [Math.abs(rowNo - orgRowNo), Math.abs(colNo - orgColNo)].sort()
+       if absDiff[0] == 0 && absDiff[1] == 1
+         Game.swapCells(Game.selectedCell, cell)
++        Game.checkMatches()
+       Game.deselectCell()
+   candyInCell: (cell) ->
+     $(cell).children('i')
+@@ -61,7 +62,6 @@ Game =
+     # Interchange classes
+     child1.removeClass(className1).addClass(className2)
+     child2.removeClass(className2).addClass(className1)
+-    Game.checkMatches()
+   selectCell: (cell) ->
+     Game.selectedCell = cell
+     $(cell).children('i').addClass('flash')
+@@ -82,13 +82,17 @@ Game =
+     cell = Game.fetchCell(rowNo, colNo)
+     candy = Game.candyInCell(cell)
+     shapeClass = Game.shapeClassOfCandy(candy)
+-    candy.removeClass(shapeClass).addClass(Game.dummyShapeClass)
++    # candy.removeClass(shapeClass).addClass(Game.dummyShapeClass)
++    candy.removeClass(shapeClass)
++    Game.populateCandyWithRandomShape(candy)
+     for i in [rowNo..2]
++      # debugger if Game.fetchCell(i, colNo).length == 0
++      # debugger if Game.fetchCell(i-1, colNo).length == 0
+       Game.swapCells Game.fetchCell(i, colNo), Game.fetchCell(i-1, colNo)
+-    topCell = Game.fetchCell 1, colNo
+-    topCandy = Game.candyInCell(topCell)
+-    topCandy.removeClass Game.dummyShapeClass
+-    Game.populateCandyWithRandomShape(topCandy)
++    # topCell = Game.fetchCell 1, colNo
++    # topCandy = Game.candyInCell(topCell)
++    # topCandy.removeClass Game.dummyShapeClass
++    # Game.populateCandyWithRandomShape(topCandy)
+   removeElements: (rowNo, firstColNo, lastColNo)->
+     # Game.removeElement(rowNo, colNo) for colNo in [firstColNo..lastColNo]
+     for colNo in [firstColNo..lastColNo]
+@@ -96,28 +100,31 @@ Game =
+   checkMatches: ->
+     console.log "Checking matches"
+     currentRowNo = Game.rowsCount
+-    currentColNo = 1
+-    checkingShape = null
+-    currentLength = 0
+-
+-    while currentColNo <= Game.columnsCount
+-      currentCell = Game.fetchCell(currentRowNo, currentColNo)
+-      currentCandy = Game.candyInCell(currentCell)
+-      currentShape = Game.shapeClassOfCandy(currentCandy)
+-      checkingShape = currentShape unless checkingShape?
+-      if checkingShape == currentShape
+-        currentLength++
+-      else
+-        if currentLength > 2
+-          console.log "The length is more: #{currentLength}"
+-          Game.removeElements currentRowNo, (currentColNo - currentLength), (currentColNo - 1)
+-          # Remove the matching elements
+-          # Bring down the elements above the removed elements
+-          # Populate blank cell on top with random shapes
+-          # Break the checking process
+-        checkingShape = currentShape
+-        currentLength = 1
+-      currentColNo++
++    matcherRunning = true
++    while (currentRowNo > 1) && matcherRunning
++      checkingShape = null
++      currentColNo = 1
++      currentLength = 0
++      while (currentColNo <= Game.columnsCount) && matcherRunning
++        currentCell = Game.fetchCell(currentRowNo, currentColNo)
++        currentCandy = Game.candyInCell(currentCell)
++        currentShape = Game.shapeClassOfCandy(currentCandy)
++        checkingShape = currentShape unless checkingShape?
++        if checkingShape == currentShape
++          currentLength++
++        else
++          if currentLength > 2
++            matcherRunning = false
++            console.log "The length is more: #{currentLength}"
++            Game.removeElements currentRowNo, (currentColNo - currentLength), (currentColNo - 1)
++            # Remove the matching elements
++            # Bring down the elements above the removed elements
++            # Populate blank cell on top with random shapes
++            # Break the checking process
++          checkingShape = currentShape
++          currentLength = 1
++        currentColNo++
++      currentRowNo--
+   init: ->
+     Game.dummyShapeClass = 'fa-circle-thin'
+     Game.rowsCount = 0

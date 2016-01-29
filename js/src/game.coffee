@@ -32,6 +32,11 @@ Game =
     [rowNo, colNo]
   highlightCell: (cell) ->
     $(cell).children('i').addClass('jello')
+  updateScore: ->
+    $('#score').html(Game.score)
+  incrementScore: (increment) ->
+    Game.score += increment
+    Game.updateScore()
   handleCellClick: (cell) ->
     if Game.selectedCell == null
       Game.selectCell(cell)
@@ -45,6 +50,8 @@ Game =
       absDiff = [Math.abs(rowNo - orgRowNo), Math.abs(colNo - orgColNo)].sort()
       if absDiff[0] == 0 && absDiff[1] == 1
         Game.swapCells(Game.selectedCell, cell)
+        Game.incrementScore(-1)
+        Game.checkMatches()
       Game.deselectCell()
   candyInCell: (cell) ->
     $(cell).children('i')
@@ -61,7 +68,6 @@ Game =
     # Interchange classes
     child1.removeClass(className1).addClass(className2)
     child2.removeClass(className2).addClass(className1)
-    Game.checkMatches()
   selectCell: (cell) ->
     Game.selectedCell = cell
     $(cell).children('i').addClass('flash')
@@ -110,6 +116,7 @@ Game =
       else
         if currentLength > 2
           console.log "The length is more: #{currentLength}"
+          Game.incrementScore(currentLength + 1)
           Game.removeElements currentRowNo, (currentColNo - currentLength), (currentColNo - 1)
           # Remove the matching elements
           # Bring down the elements above the removed elements
@@ -122,6 +129,8 @@ Game =
     Game.dummyShapeClass = 'fa-circle-thin'
     Game.rowsCount = 0
     Game.columnsCount = 0
+    Game.score = 0
+    Game.updateScore()
     Game.deselectCell()
     Game.populateCellsWithShapes()
     Game.popualateCellCoordinates()

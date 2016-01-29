@@ -45,6 +45,13 @@ Game = {
   highlightCell: function(cell) {
     return $(cell).children('i').addClass('jello');
   },
+  updateScore: function() {
+    return $('#score').html(Game.score);
+  },
+  incrementScore: function(increment) {
+    Game.score += increment;
+    return Game.updateScore();
+  },
   handleCellClick: function(cell) {
     var absDiff, colNo, coords, orgColNo, orgRowNo, rowNo;
     if (Game.selectedCell === null) {
@@ -59,6 +66,8 @@ Game = {
       absDiff = [Math.abs(rowNo - orgRowNo), Math.abs(colNo - orgColNo)].sort();
       if (absDiff[0] === 0 && absDiff[1] === 1) {
         Game.swapCells(Game.selectedCell, cell);
+        Game.incrementScore(-1);
+        Game.checkMatches();
       }
       return Game.deselectCell();
     }
@@ -78,8 +87,7 @@ Game = {
     className1 = Game.shapeClassOfCandy(child1);
     className2 = Game.shapeClassOfCandy(child2);
     child1.removeClass(className1).addClass(className2);
-    child2.removeClass(className2).addClass(className1);
-    return Game.checkMatches();
+    return child2.removeClass(className2).addClass(className1);
   },
   selectCell: function(cell) {
     var colNo, coords, rowNo;
@@ -144,6 +152,7 @@ Game = {
       } else {
         if (currentLength > 2) {
           console.log("The length is more: " + currentLength);
+          Game.incrementScore(currentLength + 1);
           Game.removeElements(currentRowNo, currentColNo - currentLength, currentColNo - 1);
         }
         checkingShape = currentShape;
@@ -157,6 +166,8 @@ Game = {
     Game.dummyShapeClass = 'fa-circle-thin';
     Game.rowsCount = 0;
     Game.columnsCount = 0;
+    Game.score = 0;
+    Game.updateScore();
     Game.deselectCell();
     Game.populateCellsWithShapes();
     Game.popualateCellCoordinates();
